@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if [ $# -eq 0 ]; then
+	echo "Docker for MXE v0.1"
+	echo "Type '$0 help' for help." >&2
+	exit 1;
+fi
+
+case "$1" in
+	build) shift 1; $0-build $@;;
+	run) shift 1; $0-run $@;;
+	help)
+		echo "Docker for MXE v0.1"
+		echo ""
+		if [ $# -eq 1 ]; then
+			echo "$0 help            Prints this help message"
+			echo "$0 help <cmd>      Prints help about a command"
+			echo "$0 build           Creates a MXE image with a list of packages"
+			echo ""
+		else
+			case "$2" in
+				build)
+					echo "TODO"
+					;;
+			esac
+		fi
+		;;
+	*) echo "Unknown: $1" >&2; exit 1;;
+esac
+

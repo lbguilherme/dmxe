@@ -1,0 +1,35 @@
+#!/bin/sh
+
+name="mxe"
+target="i686-w64-mingw32.static"
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+		-n) name="$2"; shift 2;;
+		--name=*) name="${1#*=}"; shift 1;;
+		
+		-t) target="$2"; shift 2;;
+		--target=*) target="${1#*=}"; shift 1;;
+		
+		--name|--target) echo "$1 requires an argument" >&2; exit 1;;
+
+		-*) echo "unknown option: $1" >&2; exit 1;;
+		*) extra="$extra $1"; shift 1;;
+	esac
+done
+
+(
+cat <<EOF
+FROM debian:stable
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y --no-install-recommends git ca-certificates make wget autoconf automake autopoint cmake bison flex bzip2 g++ gperf intltool libtool libtool-bin python ruby scons unzip p7zip-full
+
+RUN git clone https://github.com/mxe/mxe
+WORKDIR /mxe
+EOF
+echo "RUN make MXE_TARGETS=$target $extra"
+echo "RUN cd /mxe/usr/bin; for file in \$(echo $target-* | sed \"s/$target-//g\"); do ln -s $target-\$file \$file; done"
+echo "ENV PATH=/mxe/usr/bin:\$PATH"
+echo "RUN useradd -d /workdir -u `id -u` mxe"
+) | docker build -t $name -
+
