@@ -72,7 +72,6 @@ case "$1" in
 		echo "RUN git clone https://github.com/mxe/mxe"
 		echo "WORKDIR /mxe"
 		echo "RUN make MXE_TARGETS=$target $extra"
-		echo "RUN cd /mxe/usr/bin; for file in \$(echo $target-* | sed \"s/$target-//g\"); do ln -s $target-\$file \$file; done"
 		echo "ENV PATH=/mxe/usr/bin:\$PATH"
 		echo "RUN useradd -d /workdir -u $(id -u) mxe"
 		) | docker build -t $name -
