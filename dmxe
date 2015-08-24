@@ -68,7 +68,7 @@ case "$1" in
 		(
 		echo "FROM debian:stable"
 		echo "RUN apt-get update && apt-get upgrade -y"
-		echo "RUN apt-get install -y --no-install-recommends git ca-certificates make wget autoconf automake autopoint cmake bison flex bzip2 g++ gperf intltool libtool libtool-bin python ruby scons unzip p7zip-full"
+		echo "RUN apt-get install -y --no-install-recommends git ca-certificates make wget autoconf automake autopoint cmake bison flex bzip2 g++ gperf intltool libtool libtool-bin python ruby scons unzip p7zip-full pkg-config libffi-dev"
 		echo "RUN git clone https://github.com/mxe/mxe"
 		echo "WORKDIR /mxe"
 		echo "RUN make MXE_TARGETS=$target $extra"
