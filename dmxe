@@ -7,24 +7,76 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
-	build) shift 1; $0-build $@;;
-	run) shift 1; $0-run $@;;
 	help)
 		echo "Docker for MXE v0.1"
 		echo ""
 		if [ $# -eq 1 ]; then
 			echo "$0 help            Prints this help message"
 			echo "$0 help <cmd>      Prints help about a command"
-			echo "$0 build           Creates a MXE image with a list of packages"
+			echo "$0 prepare         Creates a MXE image with a list of packages"
+			echo "$0 run             Launches the image opening a shell with access to the current directory"
 			echo ""
 		else
 			case "$2" in
-				build)
+				prepare)
+					echo "TODO"
+					;;
+				run)
 					echo "TODO"
 					;;
 			esac
 		fi
 		;;
+	
+	run) shift 1;
+		name="mxe"
+		
+		while [ "$#" -gt 0 ]; do
+			case "$1" in
+				-n) name="$2"; shift 2;;
+				--name=*) name="${1#*=}"; shift 1;;
+				
+				--name) echo "$1 requires an argument" >&2; exit 1;;
+		
+				-*) echo "unknown option: $1" >&2; exit 1;;
+				*) extra="$extra $1"; shift 1;;
+			esac
+		done
+		
+		docker run --rm -v `pwd`:/workdir -w /workdir -ti -u `id -u` --name=$name -h $name $name bash
+		;;
+	
+	prepare) shift 1;
+		name="mxe"
+		target="i686-w64-mingw32.static"
+		
+		while [ "$#" -gt 0 ]; do
+			case "$1" in
+				-n) name="$2"; shift 2;;
+				--name=*) name="${1#*=}"; shift 1;;
+				
+				-t) target="$2"; shift 2;;
+				--target=*) target="${1#*=}"; shift 1;;
+				
+				--name|--target) echo "$1 requires an argument" >&2; exit 1;;
+		
+				-*) echo "unknown option: $1" >&2; exit 1;;
+				*) extra="$extra $1"; shift 1;;
+			esac
+		done
+		
+		(
+		echo "FROM debian:stable"
+		echo "RUN apt-get update && apt-get upgrade -y"
+		echo "RUN apt-get install -y --no-install-recommends git ca-certificates make wget autoconf automake autopoint cmake bison flex bzip2 g++ gperf intltool libtool libtool-bin python ruby scons unzip p7zip-full"
+		echo "RUN git clone https://github.com/mxe/mxe"
+		echo "WORKDIR /mxe"
+		echo "RUN make MXE_TARGETS=$target $extra"
+		echo "RUN cd /mxe/usr/bin; for file in \$(echo $target-* | sed \"s/$target-//g\"); do ln -s $target-\$file \$file; done"
+		echo "ENV PATH=/mxe/usr/bin:\$PATH"
+		echo "RUN useradd -d /workdir -u $(id -u) mxe"
+		) | docker build -t $name -
+		;;
+	
 	*) echo "Unknown: $1" >&2; exit 1;;
 esac
-
