@@ -17,7 +17,7 @@ The **only** dependency here is Docker itself, everything else will automaticall
     
 2. Build the MXE image. You can specify a target and a list of packages to include. This will take a while.
 
-    ./dmxe build --target=i686-w64-mingw32.static gcc
+    ./dmxe prepare --target=i686-w64-mingw32.static gcc
     
 3. Create your first code to compile with MXE. For example:
 
