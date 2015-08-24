@@ -43,7 +43,7 @@ case "$1" in
 			esac
 		done
 		
-		docker run --rm -v `pwd`:/workdir -w /workdir -ti -u `id -u` --name=$name -h $name $name bash
+		docker run --rm -v `pwd`:/workdir -w /workdir -ti -u `id -u` --name=$name -h $name -e HISTFILE=/dev/null $name bash
 		;;
 	
 	prepare) shift 1;
