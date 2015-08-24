@@ -39,7 +39,7 @@ You will be presented with a shell:
     
 5. Compile your file and exit:
 
-    mxe@mxe:~$ gcc main.c -o main.exe
+    mxe@mxe:~$ mxe-gcc main.c -o main.exe
     mxe@mxe:~$ exit
     
 6. Take a look on the file you produced:
