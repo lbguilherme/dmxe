@@ -13,12 +13,16 @@ case "$1" in
 		if [ $# -eq 1 ]; then
 			echo "$0 help            Prints this help message"
 			echo "$0 help <cmd>      Prints help about a command"
-			echo "$0 prepare         Creates a MXE image with a list of packages"
+			echo "$0 prepare         Creates a base MXE image"
+			echo "$0 make            Makes a list of libraries on the image"
 			echo "$0 run             Launches the image opening a shell with access to the current directory"
 			echo ""
 		else
 			case "$2" in
 				prepare)
+					echo "TODO"
+					;;
+				make)
 					echo "TODO"
 					;;
 				run)
