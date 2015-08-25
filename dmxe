@@ -101,7 +101,7 @@ case "$1" in
 		
 		mxedir="/opt/mxe/$name"
 		
-		docker run --rm -v `pwd`:/workdir -w /workdir -ti -u `id -u` --name=mxe-$name -h $name -e HISTFILE=/dev/null mxe bash
+		docker run --rm -v $mxedir:/mxe -v `pwd`:/workdir -w /workdir -ti -u `id -u` --name=mxe-$name -h $name -e HISTFILE=/dev/null mxe bash
 		;;
 	
 	*) echo "Unknown: $1" >&2; exit 1;;
