@@ -14,12 +14,16 @@ case "$1" in
 			echo "$0 help            Prints this help message"
 			echo "$0 help <cmd>      Prints help about a command"
 			echo "$0 prepare         Creates a base MXE image"
+			echo "$0 pull            Pulls the lastest changes from mxe repository"
 			echo "$0 make            Makes a list of libraries on the image"
 			echo "$0 run             Launches the image opening a shell with access to the current directory"
 			echo ""
 		else
 			case "$2" in
 				prepare)
+					echo "TODO"
+					;;
+				pull)
 					echo "TODO"
 					;;
 				make)
@@ -65,6 +69,27 @@ case "$1" in
 			docker run --rm -v $mxedir:/mxe -w / --name=mxe-$name mxe git clone https://github.com/mxe/mxe
 		fi
 		
+		;;
+	
+	pull) shift 1;
+		name="default"
+		
+		while [ "$#" -gt 0 ]; do
+			case "$1" in
+				-n) name="$2"; shift 2;;
+				--name=*) name="${1#*=}"; shift 1;;
+				
+				--name) echo "$1 requires an argument" >&2; exit 1;;
+		
+				*) echo "unknown option: $1" >&2; exit 1;;
+			esac
+		done
+		
+		mxedir="/opt/mxe/$name"
+		
+		echo "Running git pull at $mxedir"
+		
+		docker run --rm -v $mxedir:/mxe -w /mxe --name=mxe-$name mxe git pull
 		;;
 	
 	make) shift 1;
