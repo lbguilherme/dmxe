@@ -28,8 +28,43 @@ case "$1" in
 		fi
 		;;
 	
-	run) shift 1;
-		name="mxe"
+	prepare) shift 1;
+		name="default"
+		mxedir=""
+		
+		while [ "$#" -gt 0 ]; do
+			case "$1" in
+				-n) name="$2"; shift 2;;
+				--name=*) name="${1#*=}"; shift 1;;
+				
+				--name|--mxedir) echo "$1 requires an argument" >&2; exit 1;;
+		
+				*) echo "unknown option: $1" >&2; exit 1;;
+			esac
+		done
+		
+		mxedir="/opt/mxe/$name"
+		
+		(
+		echo "FROM debian:stable"
+		echo "RUN apt-get update && apt-get upgrade -y"
+		echo "RUN apt-get install -y --no-install-recommends git ca-certificates make wget autoconf automake autopoint cmake bison flex bzip2 g++ gperf intltool libtool libtool-bin python ruby scons unzip p7zip-full pkg-config libffi-dev"
+		echo "WORKDIR /mxe"
+		echo "ENV PATH=/mxe/usr/bin:\$PATH"
+		echo "RUN useradd -d /workdir -u $(id -u) mxe"
+		) | docker build -t mxe -
+		
+		if [ -f "$mxedir/Makefile" ]
+		then
+			echo "Skip cloning git, MXE already exists at $mxedir"
+		else
+			docker run --rm -v $mxedir:/mxe -w / --name=mxe-$name mxe git clone https://github.com/mxe/mxe
+		fi
+		
+		;;
+	
+	make) shift 1;
+		name="default"
 		
 		while [ "$#" -gt 0 ]; do
 			case "$1" in
@@ -43,39 +78,30 @@ case "$1" in
 			esac
 		done
 		
-		docker run --rm -v `pwd`:/workdir -w /workdir -ti -u `id -u` --name=$name -h $name -e HISTFILE=/dev/null $name bash
+		mxedir="/opt/mxe/$name"
+		
+		echo "Running make at $mxedir"
+		
+		docker run --rm -v $mxedir:/mxe -w /mxe --name=mxe-$name mxe make $extra
 		;;
 	
-	prepare) shift 1;
-		name="mxe"
-		target="i686-w64-mingw32.static"
+	run) shift 1;
+		name="default"
 		
 		while [ "$#" -gt 0 ]; do
 			case "$1" in
 				-n) name="$2"; shift 2;;
 				--name=*) name="${1#*=}"; shift 1;;
 				
-				-t) target="$2"; shift 2;;
-				--target=*) target="${1#*=}"; shift 1;;
-				
-				--name|--target) echo "$1 requires an argument" >&2; exit 1;;
+				--name) echo "$1 requires an argument" >&2; exit 1;;
 		
-				-*) echo "unknown option: $1" >&2; exit 1;;
-				*) extra="$extra $1"; shift 1;;
+				*) echo "unknown option: $1" >&2; exit 1;;
 			esac
 		done
 		
-		(
-		echo "FROM debian:stable"
-		echo "RUN apt-get update && apt-get upgrade -y"
-		echo "RUN apt-get install -y --no-install-recommends git ca-certificates make wget autoconf automake autopoint cmake bison flex bzip2 g++ gperf intltool libtool libtool-bin python ruby scons unzip p7zip-full pkg-config libffi-dev"
-		echo "RUN git clone https://github.com/mxe/mxe"
-		echo "WORKDIR /mxe"
-		echo "RUN make MXE_TARGETS=$target $extra"
-		echo "RUN cd /mxe/usr/bin; for file in \$(echo $target-* | sed \"s/$target-//g\"); do ln -s $target-\$file mxe-\$file; done"
-		echo "ENV PATH=/mxe/usr/bin:\$PATH"
-		echo "RUN useradd -d /workdir -u $(id -u) mxe"
-		) | docker build -t $name -
+		mxedir="/opt/mxe/$name"
+		
+		docker run --rm -v `pwd`:/workdir -w /workdir -ti -u `id -u` --name=mxe-$name -h $name -e HISTFILE=/dev/null mxe bash
 		;;
 	
 	*) echo "Unknown: $1" >&2; exit 1;;

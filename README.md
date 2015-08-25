@@ -16,12 +16,17 @@ The **only** dependency here is Docker itself, everything else will automaticall
 	cd dmxe
 	```
 
-2. Build the MXE image. You can specify a target and a list of packages to include. This will take a while.
+2. Prepare the MXE image. This will fetch the lastest Debian image and install all dependencies. Then it will clone the mxe repo inside it.
 	```sh
-	./dmxe prepare --target=i686-w64-mingw32.static gcc
+	./dmxe prepare
+	```
+
+3. Make the libraries you need. This will launch the container and invoke `make` there with whatever you pass here:
+	```sh
+	./dmxe make gcc
 	```
     
-3. Create your first code to compile with MXE. For example:
+4. Create your first code to compile with MXE. For example:
 	```c
 	// main.c
 	#include <windows.h>
@@ -32,29 +37,29 @@ The **only** dependency here is Docker itself, everything else will automaticall
 	}
 	```
 
-4. Run the image you have just built, with all options ready for you:
+5. Run the image you have just built:
 	```sh
 	./dmxe run
 	```
 
-	You will be presented with a shell:
+	You will be presented with a shell where you can access your current directory:
 	```sh
-	mxe@mxe:~$
+	mxe@default:~$
 	```
 
-5. Simply compile your file and exit. `mxe-gcc` here is the cross compiler for the target you specified:
+6. Simply compile your file and exit. `i686-w64-mingw32.static-gcc` here is the cross compiler for the default target:
 	```sh
-	mxe@mxe:~$ mxe-gcc main.c -o main.exe
-	mxe@mxe:~$ exit
+	mxe@default:~$ i686-w64-mingw32.static-gcc main.c -o main.exe
+	mxe@default:~$ exit
 	```
     
-6. Take a look on the file you produced:
+7. Take a look on the file you have produced:
 	```sh
 	file main.exe
 	# main.exe: PE32 executable (console) Intel 80386, for MS Windows
 	```
 
-7. Run it! [Wine](https://www.winehq.org/) is your friend.
+8. Run it! [Wine](https://www.winehq.org/) is your friend.
 	```sh
 	wine main.exe
 	```
